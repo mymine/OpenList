@@ -60,21 +60,12 @@ jobs:
       - changelog
     strategy:
       matrix:
-        include:
-          - target: "!(*musl*|*windows-arm64*|*windows7-*|*android*|*freebsd*)" # xgo and loongarch
-            hash: "md5"
-          - target: "linux-!(arm*)-musl*" #musl-not-arm
-            hash: "md5-linux-musl"
-          - target: "linux-arm*-musl*" #musl-arm
-            hash: "md5-linux-musl-arm"
-          - target: "windows-arm64" #win-arm64
-            hash: "md5-windows-arm64"
-          - target: "windows7-*" #win7
-            hash: "md5-windows7"
-          - target: "android-*" #android
+        include:      
+          - target: "linux-amd64-musl" #linux-amd64-musl
+            hash: "md5-linux-musl"       
+          - target: "android-arm64" #android-arm64
             hash: "md5-android"
-          - target: "freebsd-*" #freebsd
-            hash: "md5-freebsd"
+
 
     name: Beta Release
     runs-on: ubuntu-latest
@@ -113,7 +104,11 @@ jobs:
 
       - name: Compress
         run: |
+          sed -i 's#"origin":      "https://www.123pan.com",#"Host":        "login.123pan.com",\n\t\t\t"origin":      "https://login.123pan.com",#g; s#"referer":     "https://www.123pan.com/",#"referer":     "https://login.123pan.com/centerlogin",#g; s#"user-agent":  "Dart/2.19(dart:io)-openlist",#"user-agent":  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0",#g' drivers/123/util.go
+          sed -i 's#"user-agent":    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) openlist-client",#"user-agent":    "123pan/v3.1.1(Android_16;OnePlus)",#g; s#"platform":      d.Platform,#"platform":      "android",#g' drivers/123/util.go
+
           bash build.sh zip ${{ matrix.hash }}
+          cp drivers/123/util.go ${{ github.workspace }}/build/compress/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -133,6 +128,7 @@ jobs:
           echo "Original target: ${{ matrix.target }}"
           echo "Cleaned target: $CLEANED_TARGET"
           echo "cleaned_target=$CLEANED_TARGET" >> $GITHUB_ENV
+          
 
       - name: Upload assets to github artifact
         uses: actions/upload-artifact@v4
