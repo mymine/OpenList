@@ -1,0 +1,6 @@
+version: "1"
+rules:
+  - base: main
+    upstream: OpenListTeam:main # change `wei` to the owner of upstream repo
+    mergeMethod: none # Optional, one of [none, merge, squash, rebase, hardreset], Default: none.
+    mergeUnstable: false # Optional, merge pull request even when the mergeable_state is not clean. Default: false
